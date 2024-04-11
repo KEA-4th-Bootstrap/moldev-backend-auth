@@ -16,6 +16,8 @@ public class Member extends BaseTimeEntity {
     @Column(name = "member_id")
     private Long id;
 
+    private String password;
+
     private String email;
 
     @Column(name = "moldev_id")
