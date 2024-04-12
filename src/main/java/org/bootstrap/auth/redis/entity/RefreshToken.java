@@ -15,7 +15,7 @@ public class RefreshToken {
 
     private String refreshToken;
 
-    public static RefreshToken create(Long memberId, String refreshToken) {
+    public static RefreshToken of(Long memberId, String refreshToken) {
         return RefreshToken.builder()
                 .memberId(memberId)
                 .refreshToken(refreshToken)
