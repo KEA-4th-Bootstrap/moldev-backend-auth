@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bootstrap.auth.common.error.GlobalErrorCode;
 import org.bootstrap.auth.common.error.UnAuthenticationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -71,7 +72,7 @@ public class TokenProvider {
             return true;
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             log.error(e.getMessage());
-            throw new UnAuthenticationException(e.getMessage());
+            throw new UnAuthenticationException(GlobalErrorCode.UNAUTHORIZED);
         }
     }
 
@@ -82,7 +83,7 @@ public class TokenProvider {
             return true;
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
             log.error(e.getMessage());
-            throw new UnAuthenticationException(e.getMessage());
+            throw new UnAuthenticationException(GlobalErrorCode.UNAUTHORIZED);
         }
     }
 

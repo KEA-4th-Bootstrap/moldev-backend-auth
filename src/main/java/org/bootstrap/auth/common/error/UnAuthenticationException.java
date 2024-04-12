@@ -1,9 +1,9 @@
 package org.bootstrap.auth.common.error;
 
 
-public class UnAuthenticationException extends RuntimeException{
+public class UnAuthenticationException extends BaseErrorException {
 
-    public UnAuthenticationException(String message) {
-        super(message);
+    public UnAuthenticationException(GlobalErrorCode errorCode) {
+        super(errorCode);
     }
 }
