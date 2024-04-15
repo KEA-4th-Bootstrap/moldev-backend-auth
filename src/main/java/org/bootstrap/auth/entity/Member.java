@@ -3,6 +3,7 @@ package org.bootstrap.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.bootstrap.auth.common.BaseTimeEntity;
+import org.bootstrap.auth.dto.request.SignUpRequestDto;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,5 +31,15 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "island_name")
     private String islandName;
+
+    public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword) {
+        return Member.builder()
+                .email(signUpRequestDto.email())
+                .password(encodedPassword)
+                .moldevId(signUpRequestDto.moldevId())
+                .nickname(signUpRequestDto.nickname())
+                .islandName(signUpRequestDto.islandName())
+                .build();
+    }
 
 }
