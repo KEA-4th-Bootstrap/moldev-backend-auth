@@ -26,19 +26,20 @@ public class Member extends BaseTimeEntity {
 
     private String nickname;
 
-    @Column(name = "profile_img")
-    private String profileImg;
+    @Column(name = "profile_img_url")
+    private String profileImgUrl;
 
     @Column(name = "island_name")
     private String islandName;
 
-    public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword) {
+    public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword, String profileImgUrl) {
         return Member.builder()
                 .email(signUpRequestDto.email())
                 .password(encodedPassword)
                 .moldevId(signUpRequestDto.moldevId())
                 .nickname(signUpRequestDto.nickname())
                 .islandName(signUpRequestDto.islandName())
+                .profileImgUrl(profileImgUrl)
                 .build();
     }
 

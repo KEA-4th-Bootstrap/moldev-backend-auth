@@ -2,6 +2,7 @@ package org.bootstrap.auth.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.bootstrap.auth.aws.S3Service;
 import org.bootstrap.auth.common.error.DuplicateException;
 import org.bootstrap.auth.common.error.EntityNotFoundException;
 import org.bootstrap.auth.common.error.GlobalErrorCode;
@@ -16,9 +17,12 @@ import org.bootstrap.auth.jwt.TokenProvider;
 import org.bootstrap.auth.redis.entity.RefreshToken;
 import org.bootstrap.auth.redis.repository.RefreshTokenRepository;
 import org.bootstrap.auth.repository.MemberRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Transactional
@@ -28,14 +32,18 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
-    public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto, MultipartFile profileImage) {
+    public static final String PROFILE_IMAGE_DIRECTORY = "profile";
+
+    public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto, @Nullable MultipartFile profileImage) {
         validateDuplicateEmail(signUpRequestDto.email());
         String encodedPassword = encodePassword(signUpRequestDto.password());
-        Member member = Member.of(signUpRequestDto, encodedPassword);
-        memberRepository.save(member);
 
-        // profileImage 저장 로직 구현
+        String profileImgUrl = checkProfileImageAndGetUrl(profileImage, signUpRequestDto.moldevId());
+
+        Member member = Member.of(signUpRequestDto, encodedPassword, profileImgUrl);
+        memberRepository.save(member);
 
         return SignUpResponseDto.of(member.getId());
     }
@@ -82,4 +90,27 @@ public class AuthService {
             throw new DuplicateException(GlobalErrorCode.DUPLICATE_EMAIL);
         }
     }
+
+    private String checkProfileImageAndGetUrl(MultipartFile profileImage, String moldevId) {
+        if (Objects.isNull(profileImage))
+            return getDefaultProfileImgUrl();
+        else
+            return uploadProfileImage(profileImage, moldevId);
+
+    }
+
+    private String uploadProfileImage(MultipartFile profileImage, String moldevId) {
+        String imageFileName = generateProfileImageFileName(Objects.requireNonNull(profileImage.getOriginalFilename()), moldevId);
+        return s3Service.uploadFile(profileImage, imageFileName, PROFILE_IMAGE_DIRECTORY);
+    }
+
+    private String getDefaultProfileImgUrl() {
+        return s3Service.getFileUrl(PROFILE_IMAGE_DIRECTORY + "/default.png");
+    }
+
+    private String generateProfileImageFileName(String originalFileName, String moldevId) {
+        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        return moldevId + extension;
+    }
+
 }
