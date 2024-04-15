@@ -1,16 +1,15 @@
 package org.bootstrap.auth.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.bootstrap.auth.common.SuccessCode;
 import org.bootstrap.auth.common.SuccessResponse;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
+import org.bootstrap.auth.dto.request.SignUpRequestDto;
 import org.bootstrap.auth.dto.response.LoginResponseDto;
+import org.bootstrap.auth.dto.response.SignUpResponseDto;
 import org.bootstrap.auth.service.AuthService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,6 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<SuccessResponse<?>> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
+                                                     @RequestPart(required = false) MultipartFile profileImage) {
+        SignUpResponseDto signUpResponseDto = authService.signUp(signUpRequestDto, profileImage);
+        return SuccessResponse.created(signUpResponseDto);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<?>> login(@RequestBody LoginRequestDto loginRequestDto) {
