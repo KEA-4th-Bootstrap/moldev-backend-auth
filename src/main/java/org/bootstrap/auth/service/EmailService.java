@@ -4,6 +4,7 @@ import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.bootstrap.auth.dto.request.SendEmailRequestDto;
 import org.bootstrap.auth.dto.response.SendEmailResponseDto;
 import org.bootstrap.auth.redis.entity.EmailVerificationCode;
 import org.bootstrap.auth.redis.repository.EmailVerificationCodeRepository;
@@ -22,12 +23,12 @@ public class EmailService {
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final JavaMailSender javaMailSender;
 
-    public SendEmailResponseDto sendEmailVerificationForm(String email) {
+    public SendEmailResponseDto sendEmailVerificationForm(SendEmailRequestDto sendEmailRequestDto) {
         try {
             String verificationCode = createRandomEmailVerificationCode();
-            MimeMessage message = createEmailVerificationForm(email, verificationCode);
+            MimeMessage message = createEmailVerificationForm(sendEmailRequestDto.email(), verificationCode);
             javaMailSender.send(message);
-            emailVerificationCodeRepository.save(EmailVerificationCode.of(email, verificationCode));
+            emailVerificationCodeRepository.save(EmailVerificationCode.of(sendEmailRequestDto.email(), verificationCode));
             return SendEmailResponseDto.of(true);
         } catch (MessagingException e) {
             throw new RuntimeException(e);

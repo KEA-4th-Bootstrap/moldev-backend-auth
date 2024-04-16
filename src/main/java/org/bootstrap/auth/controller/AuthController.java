@@ -3,6 +3,7 @@ package org.bootstrap.auth.controller;
 import lombok.RequiredArgsConstructor;
 import org.bootstrap.auth.common.SuccessResponse;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
+import org.bootstrap.auth.dto.request.SendEmailRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
 import org.bootstrap.auth.dto.response.LoginResponseDto;
 import org.bootstrap.auth.dto.response.SendEmailResponseDto;
@@ -22,10 +23,11 @@ public class AuthController {
     private final EmailService emailService;
 
     @PostMapping("/send-email")
-    public ResponseEntity<SuccessResponse<?>> sendEmail(@RequestParam String email) {
-        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailVerificationForm(email);
+    public ResponseEntity<SuccessResponse<?>> sendEmail(@RequestBody SendEmailRequestDto sendEmailRequestDto) {
+        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailVerificationForm(sendEmailRequestDto);
         return SuccessResponse.ok(sendEmailResponseDto);
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse<?>> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
