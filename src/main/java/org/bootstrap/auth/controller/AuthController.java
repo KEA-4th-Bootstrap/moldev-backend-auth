@@ -5,8 +5,10 @@ import org.bootstrap.auth.common.SuccessResponse;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
 import org.bootstrap.auth.dto.response.LoginResponseDto;
+import org.bootstrap.auth.dto.response.SendEmailResponseDto;
 import org.bootstrap.auth.dto.response.SignUpResponseDto;
 import org.bootstrap.auth.service.AuthService;
+import org.bootstrap.auth.service.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailService emailService;
+
+    @PostMapping("/send-email")
+    public ResponseEntity<SuccessResponse<?>> sendEmail(@RequestParam String email) {
+        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailVerificationForm(email);
+        return SuccessResponse.ok(sendEmailResponseDto);
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse<?>> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
