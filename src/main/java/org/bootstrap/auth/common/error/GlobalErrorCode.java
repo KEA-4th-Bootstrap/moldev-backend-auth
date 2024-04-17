@@ -17,6 +17,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "GLOBAL_401_4", "만료된 Access Token 입니다."),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "GLOBAL_401_5", "만료된 Refresh Token 입니다."),
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "GLOBAL_401_6", "비밀번호가 일치하지 않습니다."),
+    INVALID_EMAIL_CODE(HttpStatus.UNAUTHORIZED, "GLOBAL_401_7", "유효하지 않은 이메일 코드입니다."),
 
     /* global error */
     HTTP_MESSAGE_NOT_READABLE(BAD_REQUEST,"GLOBAL_400_1", "잘못된 형식의 값을 입력했습니다."),
