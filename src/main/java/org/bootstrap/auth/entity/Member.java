@@ -32,6 +32,10 @@ public class Member extends BaseTimeEntity {
     @Column(name = "island_name")
     private String islandName;
 
+    @Column(name = "view_count")
+    @Builder.Default
+    private Integer viewCount = 0;
+
     public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword, String profileImgUrl) {
         return Member.builder()
                 .email(signUpRequestDto.email())
