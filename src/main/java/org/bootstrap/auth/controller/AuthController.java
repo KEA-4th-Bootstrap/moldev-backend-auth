@@ -1,5 +1,8 @@
 package org.bootstrap.auth.controller;
 
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.bootstrap.auth.common.SuccessResponse;
@@ -46,8 +49,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<?>> login(@RequestBody LoginRequestDto loginRequestDto) {
-        LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
+    public ResponseEntity<SuccessResponse<?>> login(@RequestBody LoginRequestDto loginRequestDto,
+                                                    HttpServletResponse response) {
+        LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
         return SuccessResponse.ok(loginResponseDto);
     }
 }

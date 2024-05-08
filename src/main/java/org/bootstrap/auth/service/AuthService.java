@@ -1,5 +1,7 @@
 package org.bootstrap.auth.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bootstrap.auth.aws.S3Service;
@@ -17,6 +19,7 @@ import org.bootstrap.auth.jwt.TokenProvider;
 import org.bootstrap.auth.redis.entity.RefreshToken;
 import org.bootstrap.auth.redis.repository.RefreshTokenRepository;
 import org.bootstrap.auth.repository.MemberRepository;
+import org.bootstrap.auth.utils.CookieUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,11 +51,12 @@ public class AuthService {
         return SignUpResponseDto.of(member.getId());
     }
 
-    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
         Member member = getUserByEmail(loginRequestDto.email());
         validatePassword(loginRequestDto.password(), member.getPassword());
         Token token = generateToken(member.getId());
         saveRefreshToken(member.getId(), token.getRefreshToken());
+        CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, token.getRefreshToken());
         return LoginResponseDto.of(member.getId(), token);
     }
 
