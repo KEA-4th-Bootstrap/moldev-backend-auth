@@ -36,6 +36,9 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     private Integer viewCount = 0;
 
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Ban ban;
+
     public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword, String profileImgUrl) {
         return Member.builder()
                 .email(signUpRequestDto.email())
