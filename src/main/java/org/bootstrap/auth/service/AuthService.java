@@ -1,16 +1,13 @@
 package org.bootstrap.auth.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bootstrap.auth.aws.S3Service;
-import org.bootstrap.auth.common.error.DuplicateException;
-import org.bootstrap.auth.common.error.EntityNotFoundException;
-import org.bootstrap.auth.common.error.GlobalErrorCode;
-import org.bootstrap.auth.common.error.UnAuthenticationException;
+import org.bootstrap.auth.common.error.*;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
+import org.bootstrap.auth.dto.response.BannedUserDetailResponseDto;
 import org.bootstrap.auth.dto.response.LoginResponseDto;
 import org.bootstrap.auth.dto.response.SignUpResponseDto;
 import org.bootstrap.auth.entity.Member;
@@ -18,6 +15,7 @@ import org.bootstrap.auth.jwt.Token;
 import org.bootstrap.auth.jwt.TokenProvider;
 import org.bootstrap.auth.redis.entity.RefreshToken;
 import org.bootstrap.auth.redis.repository.RefreshTokenRepository;
+import org.bootstrap.auth.repository.BanRepository;
 import org.bootstrap.auth.repository.MemberRepository;
 import org.bootstrap.auth.utils.CookieUtils;
 import org.springframework.lang.Nullable;
@@ -32,6 +30,7 @@ import java.util.Objects;
 @Service
 public class AuthService {
     private final MemberRepository memberRepository;
+    private final BanRepository banRepository;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -54,11 +53,13 @@ public class AuthService {
     public LoginResponseDto login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
         Member member = getUserByEmail(loginRequestDto.email());
         validatePassword(loginRequestDto.password(), member.getPassword());
+        validateBan(member);
         Token token = generateToken(member.getId());
         saveRefreshToken(member.getId(), token.getRefreshToken());
         CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, token.getRefreshToken());
         return LoginResponseDto.of(member.getId(), token);
     }
+
 
     private Member getUserByEmail(String email) {
         return memberRepository.findByEmail(email)
@@ -75,6 +76,16 @@ public class AuthService {
         }
     }
 
+    private void validateBan(Member member) {
+        banRepository.findByMemberId(member.getId())
+                .ifPresent(ban -> {
+                    GlobalErrorCode bannedUserErorrCode = GlobalErrorCode.BANNED_USER;
+                    BannedUserDetailResponseDto bannedUserDetailResponseDto = BannedUserDetailResponseDto.of(ban);
+                    bannedUserErorrCode.setDetail(bannedUserDetailResponseDto);
+                    throw new BannedUserException(bannedUserErorrCode);
+                });
+    }
+
     private Token generateToken(Long userId) {
         return Token.of(tokenProvider.createAccessToken(userId), tokenProvider.createRefreshToken());
     }
@@ -83,8 +94,7 @@ public class AuthService {
         if (refreshTokenRepository.existsById(userId)) {
             RefreshToken originalRefreshToken = refreshTokenRepository.findById(userId).get();
             originalRefreshToken.update(newRefreshToken);
-        }
-        else {
+        } else {
             refreshTokenRepository.save(RefreshToken.of(userId, newRefreshToken));
         }
     }
