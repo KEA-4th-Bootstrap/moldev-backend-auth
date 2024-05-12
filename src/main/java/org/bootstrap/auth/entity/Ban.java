@@ -2,6 +2,7 @@ package org.bootstrap.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.bootstrap.auth.entity.converter.ReasonTypeConverter;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,8 @@ public class Ban {
     private Member member;
 
     private LocalDateTime unbanDate;
+
+    @Convert(converter = ReasonTypeConverter.class)
     private ReasonType reason;
 
     public static Ban of(Member member, LocalDateTime unbanDate) {
