@@ -50,7 +50,7 @@ public class AuthController {
         return SuccessResponse.ok(loginResponseDto);
     }
 
-    @PostMapping("/check-duplicate-moldev-id/{moldevId}")
+    @GetMapping("/check-duplicate/{moldevId}")
     public ResponseEntity<SuccessResponse<?>> checkId(@PathVariable("moldevId") String moldevId) {
         DuplicateMoldevIdResponseDto duplicateMoldevIdResponseDto = authService.checkDuplicateMoldevId(moldevId);
         return SuccessResponse.ok(duplicateMoldevIdResponseDto);
