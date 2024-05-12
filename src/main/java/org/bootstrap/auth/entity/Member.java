@@ -42,6 +42,9 @@ public class Member extends BaseTimeEntity {
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Ban ban;
 
+    @Column(name = "marketing_agree", nullable = false)
+    private Boolean isMarketingAgree;
+
     public static Member of(SignUpRequestDto signUpRequestDto, String encodedPassword, String profileImgUrl) {
         return Member.builder()
                 .email(signUpRequestDto.email())
@@ -50,6 +53,7 @@ public class Member extends BaseTimeEntity {
                 .nickname(signUpRequestDto.nickname())
                 .islandName(signUpRequestDto.islandName())
                 .profileImgUrl(profileImgUrl)
+                .isMarketingAgree(signUpRequestDto.isMarketingAgree())
                 .build();
     }
 
