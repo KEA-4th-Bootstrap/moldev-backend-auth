@@ -2,6 +2,7 @@ package org.bootstrap.auth.service;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.bootstrap.auth.common.error.DuplicateException;
 import org.bootstrap.auth.common.error.EntityNotFoundException;
 import org.bootstrap.auth.common.error.GlobalErrorCode;
 import org.bootstrap.auth.common.error.UnAuthenticationException;
@@ -12,6 +13,7 @@ import org.bootstrap.auth.dto.response.VerifyEmailResponseDto;
 import org.bootstrap.auth.mail.MailProvider;
 import org.bootstrap.auth.redis.entity.EmailVerificationCode;
 import org.bootstrap.auth.redis.repository.EmailVerificationCodeRepository;
+import org.bootstrap.auth.repository.MemberRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,8 +28,10 @@ public class EmailService {
 
     private final EmailVerificationCodeRepository emailVerificationCodeRepository;
     private final MailProvider mailProvider;
+    private final MemberRepository memberRepository;
 
     public SendEmailResponseDto sendEmailVerificationForm(SendEmailRequestDto sendEmailRequestDto) {
+        validateDuplicateEmail(sendEmailRequestDto.email());
         String verificationCode = mailProvider.createRandomEmailVerificationCode();
         MimeMessage message = mailProvider.createEmailVerificationForm(sendEmailRequestDto.email(), verificationCode);
         mailProvider.sendEmail(message);
@@ -55,4 +59,9 @@ public class EmailService {
         return emailVerificationCodeRepository.findById(email).get().getCode();
     }
 
+    private void validateDuplicateEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new DuplicateException(GlobalErrorCode.DUPLICATE_EMAIL);
+        }
+    }
 }
