@@ -1,7 +1,5 @@
 package org.bootstrap.auth.controller;
 
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +8,7 @@ import org.bootstrap.auth.dto.request.LoginRequestDto;
 import org.bootstrap.auth.dto.request.SendEmailRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
 import org.bootstrap.auth.dto.request.VerifyEmailRequestDto;
-import org.bootstrap.auth.dto.response.LoginResponseDto;
-import org.bootstrap.auth.dto.response.SendEmailResponseDto;
-import org.bootstrap.auth.dto.response.SignUpResponseDto;
-import org.bootstrap.auth.dto.response.VerifyEmailResponseDto;
+import org.bootstrap.auth.dto.response.*;
 import org.bootstrap.auth.service.AuthService;
 import org.bootstrap.auth.service.EmailService;
 import org.springframework.http.ResponseEntity;
@@ -53,5 +48,11 @@ public class AuthController {
                                                     HttpServletResponse response) {
         LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
         return SuccessResponse.ok(loginResponseDto);
+    }
+
+    @PostMapping("/check-duplicate-moldev-id/{moldevId}")
+    public ResponseEntity<SuccessResponse<?>> checkId(@PathVariable("moldevId") String moldevId) {
+        DuplicateMoldevIdResponseDto duplicateMoldevIdResponseDto = authService.checkDuplicateMoldevId(moldevId);
+        return SuccessResponse.ok(duplicateMoldevIdResponseDto);
     }
 }
