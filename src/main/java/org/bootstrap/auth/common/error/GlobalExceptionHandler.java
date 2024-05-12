@@ -71,9 +71,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // 비즈니스 로직 에러 처리
     @ExceptionHandler(BaseErrorException.class)
-    public ResponseEntity<ErrorResponse> handleBaseErrorException(BaseErrorException e, HttpServletRequest request) {
+    public ResponseEntity<?> handleBaseErrorException(BaseErrorException e, HttpServletRequest request) {
         log.error("BaseErrorException", e);
         final ErrorReason errorReason = e.getErrorCode().getErrorReason();
+        if (errorReason.getDetail() != null) {
+            final ErrorWithDetailResponse errorWithDetailResponse = ErrorWithDetailResponse.from(errorReason);
+            return ResponseEntity.status(HttpStatus.valueOf(errorReason.getStatus()))
+                    .body(errorWithDetailResponse);
+        }
         final ErrorResponse errorResponse = ErrorResponse.from(errorReason);
         return ResponseEntity.status(HttpStatus.valueOf(errorReason.getStatus()))
                 .body(errorResponse);

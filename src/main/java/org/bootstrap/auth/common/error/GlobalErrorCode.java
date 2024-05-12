@@ -2,12 +2,14 @@ package org.bootstrap.auth.common.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 import static org.springframework.http.HttpStatus.*;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum GlobalErrorCode implements BaseErrorCode {
 
     /* Authentication error */
@@ -18,6 +20,7 @@ public enum GlobalErrorCode implements BaseErrorCode {
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "GLOBAL_401_5", "만료된 Refresh Token 입니다."),
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "GLOBAL_401_6", "비밀번호가 일치하지 않습니다."),
     INVALID_EMAIL_CODE(HttpStatus.UNAUTHORIZED, "GLOBAL_401_7", "유효하지 않은 이메일 코드입니다."),
+    BANNED_USER(HttpStatus.UNAUTHORIZED, "GLOBAL_401_8", "차단된 사용자입니다."),
 
     /* global error */
     HTTP_MESSAGE_NOT_READABLE(BAD_REQUEST,"GLOBAL_400_1", "잘못된 형식의 값을 입력했습니다."),
@@ -33,12 +36,16 @@ public enum GlobalErrorCode implements BaseErrorCode {
     DUPLICATE_EMAIL(CONFLICT, "GLOBAL_409_1", "이미 존재하는 이메일입니다."),
     FILE_UPLOAD_ERROR(CONFLICT, "GLOBAL_409_2", "파일 업로드 중 오류가 발생했습니다.");
 
-    private HttpStatus status;
-    private String code;
-    private String reason;
+    private final HttpStatus status;
+    private final String code;
+    private final String reason;
+    @Setter
+    private Object detail = null;
 
     @Override
     public ErrorReason getErrorReason() {
+        if (detail != null)
+            return ErrorReason.of(status.value(), code, reason, detail);
         return ErrorReason.of(status.value(), code, reason);
     }
 }
