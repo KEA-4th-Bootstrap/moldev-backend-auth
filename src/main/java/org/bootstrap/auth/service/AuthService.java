@@ -8,6 +8,7 @@ import org.bootstrap.auth.common.error.*;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
 import org.bootstrap.auth.dto.response.BannedUserDetailResponseDto;
+import org.bootstrap.auth.dto.response.DuplicateMoldevIdResponseDto;
 import org.bootstrap.auth.dto.response.LoginResponseDto;
 import org.bootstrap.auth.dto.response.SignUpResponseDto;
 import org.bootstrap.auth.entity.Member;
@@ -58,6 +59,13 @@ public class AuthService {
         saveRefreshToken(member.getId(), token.getRefreshToken());
         CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, token.getRefreshToken());
         return LoginResponseDto.of(member.getId(), token);
+    }
+
+    public DuplicateMoldevIdResponseDto checkDuplicateMoldevId(String moldevId) {
+        if (memberRepository.existsByMoldevId(moldevId)) {
+            return DuplicateMoldevIdResponseDto.of(true);
+        }
+        return DuplicateMoldevIdResponseDto.of(false);
     }
 
 

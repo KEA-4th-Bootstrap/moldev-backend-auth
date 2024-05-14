@@ -5,6 +5,7 @@ public record SignUpRequestDto(
     String password,
     String moldevId,
     String nickname,
-    String islandName
+    String islandName,
+    Boolean isMarketingAgree
 ) {
 }
