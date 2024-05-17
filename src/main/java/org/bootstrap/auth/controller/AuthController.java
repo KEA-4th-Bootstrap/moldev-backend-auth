@@ -29,12 +29,17 @@ public class AuthController {
         return SuccessResponse.ok(sendEmailResponseDto);
     }
 
+    @PostMapping("/send-reset-email")
+    public ResponseEntity<SuccessResponse<?>> sendEmailForPasswordChange(@RequestBody @Valid SendEmailRequestDto sendEmailRequestDto) {
+        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailForPasswordChangeForm(sendEmailRequestDto);
+        return SuccessResponse.ok(sendEmailResponseDto);
+    }
+
     @PostMapping("/verify-email")
     public ResponseEntity<SuccessResponse<?>> verifyEmail(@RequestBody @Valid VerifyEmailRequestDto verifyEmailRequestDto) {
         VerifyEmailResponseDto verifyEmailResponseDto = emailService.verifyEmail(verifyEmailRequestDto);
         return SuccessResponse.ok(verifyEmailResponseDto);
     }
-
 
     @PostMapping("/signup")
     public ResponseEntity<SuccessResponse<?>> signUp(@RequestPart SignUpRequestDto signUpRequestDto,

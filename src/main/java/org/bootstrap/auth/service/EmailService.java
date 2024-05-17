@@ -10,6 +10,7 @@ import org.bootstrap.auth.dto.request.SendEmailRequestDto;
 import org.bootstrap.auth.dto.request.VerifyEmailRequestDto;
 import org.bootstrap.auth.dto.response.SendEmailResponseDto;
 import org.bootstrap.auth.dto.response.VerifyEmailResponseDto;
+import org.bootstrap.auth.entity.Member;
 import org.bootstrap.auth.mail.MailProvider;
 import org.bootstrap.auth.redis.entity.EmailVerificationCode;
 import org.bootstrap.auth.redis.repository.EmailVerificationCodeRepository;
@@ -32,6 +33,15 @@ public class EmailService {
 
     public SendEmailResponseDto sendEmailVerificationForm(SendEmailRequestDto sendEmailRequestDto) {
         validateDuplicateEmail(sendEmailRequestDto.email());
+        String verificationCode = mailProvider.createRandomEmailVerificationCode();
+        MimeMessage message = mailProvider.createEmailVerificationForm(sendEmailRequestDto.email(), verificationCode);
+        mailProvider.sendEmail(message);
+        emailVerificationCodeRepository.save(EmailVerificationCode.of(sendEmailRequestDto.email(), verificationCode));
+        return SendEmailResponseDto.of(true);
+    }
+
+    public SendEmailResponseDto sendEmailForPasswordChangeForm(SendEmailRequestDto sendEmailRequestDto) {
+        findMemberByEmail(sendEmailRequestDto.email());
         String verificationCode = mailProvider.createRandomEmailVerificationCode();
         MimeMessage message = mailProvider.createEmailVerificationForm(sendEmailRequestDto.email(), verificationCode);
         mailProvider.sendEmail(message);
@@ -62,6 +72,12 @@ public class EmailService {
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DuplicateException(GlobalErrorCode.DUPLICATE_EMAIL);
+        }
+    }
+
+    private void findMemberByEmail(String email) {
+        if (!memberRepository.existsByEmail(email)) {
+            throw new DuplicateException(GlobalErrorCode.USER_NOT_FOUND);
         }
     }
 }
