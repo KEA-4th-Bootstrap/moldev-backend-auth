@@ -11,6 +11,7 @@ import org.bootstrap.auth.dto.request.VerifyEmailRequestDto;
 import org.bootstrap.auth.dto.response.*;
 import org.bootstrap.auth.service.AuthService;
 import org.bootstrap.auth.service.EmailService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,40 +25,40 @@ public class AuthController {
     private final EmailService emailService;
 
     @PostMapping("/send-email")
-    public ResponseEntity<SuccessResponse<?>> sendEmail(@RequestBody @Valid SendEmailRequestDto sendEmailRequestDto) {
-        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailVerificationForm(sendEmailRequestDto);
-        return SuccessResponse.ok(sendEmailResponseDto);
+    public ResponseEntity<SendEmailResponseDto> sendEmail(@RequestBody @Valid SendEmailRequestDto sendEmailRequestDto) {
+        final SendEmailResponseDto response = emailService.sendEmailVerificationForm(sendEmailRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/send-reset-email")
-    public ResponseEntity<SuccessResponse<?>> sendEmailForPasswordChange(@RequestBody @Valid SendEmailRequestDto sendEmailRequestDto) {
-        SendEmailResponseDto sendEmailResponseDto = emailService.sendEmailForPasswordChangeForm(sendEmailRequestDto);
-        return SuccessResponse.ok(sendEmailResponseDto);
+    public ResponseEntity<SendEmailResponseDto> sendEmailForPasswordChange(@RequestBody @Valid SendEmailRequestDto sendEmailRequestDto) {
+        final SendEmailResponseDto response = emailService.sendEmailForPasswordChangeForm(sendEmailRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/verify-email")
-    public ResponseEntity<SuccessResponse<?>> verifyEmail(@RequestBody @Valid VerifyEmailRequestDto verifyEmailRequestDto) {
-        VerifyEmailResponseDto verifyEmailResponseDto = emailService.verifyEmail(verifyEmailRequestDto);
-        return SuccessResponse.ok(verifyEmailResponseDto);
+    public ResponseEntity<VerifyEmailResponseDto> verifyEmail(@RequestBody @Valid VerifyEmailRequestDto verifyEmailRequestDto) {
+        final VerifyEmailResponseDto response = emailService.verifyEmail(verifyEmailRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<SuccessResponse<?>> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
+    public ResponseEntity<SignUpResponseDto> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
                                                      @RequestPart(required = false) MultipartFile profileImage) {
-        SignUpResponseDto signUpResponseDto = authService.signUp(signUpRequestDto, profileImage);
-        return SuccessResponse.created(signUpResponseDto);
+        final SignUpResponseDto response = authService.signUp(signUpRequestDto, profileImage);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<?>> login(@RequestBody LoginRequestDto loginRequestDto,
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto,
                                                     HttpServletResponse response) {
-        LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
-        return SuccessResponse.ok(loginResponseDto);
+        final LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponseDto);
     }
 
     @GetMapping("/check-duplicate/{moldevId}")
-    public ResponseEntity<SuccessResponse<?>> checkId(@PathVariable("moldevId") String moldevId) {
-        DuplicateMoldevIdResponseDto duplicateMoldevIdResponseDto = authService.checkDuplicateMoldevId(moldevId);
-        return SuccessResponse.ok(duplicateMoldevIdResponseDto);
+    public ResponseEntity<DuplicateMoldevIdResponseDto> checkId(@PathVariable("moldevId") String moldevId) {
+        final DuplicateMoldevIdResponseDto response = authService.checkDuplicateMoldevId(moldevId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
