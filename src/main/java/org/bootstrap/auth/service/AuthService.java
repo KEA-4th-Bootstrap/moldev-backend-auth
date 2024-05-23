@@ -41,6 +41,7 @@ public class AuthService {
 
     public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto, @Nullable MultipartFile profileImage) {
         validateDuplicateEmail(signUpRequestDto.email());
+        validateDuplicateMoldevId(signUpRequestDto.moldevId());
         String encodedPassword = encodePassword(signUpRequestDto.password());
 
         String profileImgUrl = checkProfileImageAndGetUrl(profileImage, signUpRequestDto.moldevId());
@@ -110,6 +111,12 @@ public class AuthService {
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DuplicateException(GlobalErrorCode.DUPLICATE_EMAIL);
+        }
+    }
+
+    private void validateDuplicateMoldevId(String moldevId){
+        if(memberRepository.existsByMoldevId(moldevId)){
+            throw new DuplicateException(GlobalErrorCode.DUPLICATE_MOLDEVID);
         }
     }
 
