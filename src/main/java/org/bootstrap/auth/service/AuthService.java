@@ -59,7 +59,7 @@ public class AuthService {
         Token token = generateToken(member.getId());
         saveRefreshToken(member.getId(), token.getRefreshToken());
         CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, token.getRefreshToken());
-        return LoginResponseDto.of(member.getId(), token);
+        return LoginResponseDto.of(member, token);
     }
 
     public DuplicateMoldevIdResponseDto checkDuplicateMoldevId(String moldevId) {
