@@ -1,6 +1,7 @@
 package org.bootstrap.auth.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,21 +42,24 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestPart SignUpRequestDto signUpRequestDto,
-                                                     @RequestPart(required = false) MultipartFile profileImage) {
+                                                    @RequestPart(required = false) MultipartFile profileImage) {
         final SignUpResponseDto response = authService.signUp(signUpRequestDto, profileImage);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto,
-                                                    HttpServletResponse response) {
+                                                  HttpServletResponse response) {
         final LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
         return ResponseEntity.status(HttpStatus.OK).body(loginResponseDto);
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ReissueResponseDto> reissue(@RequestBody ReissueRequestDto reissueRequestDto) throws JsonProcessingException {
-        final ReissueResponseDto reissueResponseDto = authService.reissue(reissueRequestDto);
+    public ResponseEntity<ReissueResponseDto> reissue(@RequestBody ReissueRequestDto reissueRequestDto,
+                                                      HttpServletRequest request,
+                                                      HttpServletResponse response
+    ) throws JsonProcessingException {
+        final ReissueResponseDto reissueResponseDto = authService.reissue(reissueRequestDto, request, response);
         return ResponseEntity.status(HttpStatus.OK).body(reissueResponseDto);
     }
 

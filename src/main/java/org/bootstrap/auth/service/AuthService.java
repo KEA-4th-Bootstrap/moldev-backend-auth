@@ -1,6 +1,8 @@
 package org.bootstrap.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
+
+import static org.bootstrap.auth.utils.CookieUtils.getCookie;
 
 @RequiredArgsConstructor
 @Transactional
@@ -61,16 +65,24 @@ public class AuthService {
         return LoginResponseDto.of(member, token);
     }
 
-    public ReissueResponseDto reissue(ReissueRequestDto request) throws JsonProcessingException {
-        Long userId = getUserIdFromAccessToken(request.accessToken());
+    public ReissueResponseDto reissue(ReissueRequestDto reissueRequestDto, HttpServletRequest request, HttpServletResponse response) throws JsonProcessingException {
+        Long userId = getUserIdFromAccessToken(reissueRequestDto.accessToken());
         RefreshToken refreshToken = getRefreshTokenFromUserId(userId);
         validateRefreshTokenNotExpired(refreshToken);
-        validateUserRefreshToken(refreshToken.getRefreshToken(), request.refreshToken());
+
+        Cookie[] cookies = request.getCookies();
+        Cookie refreshTokenCookie = getCookie(cookies, TokenProvider.REFRESH_TOKEN);
+        if (Objects.isNull(refreshTokenCookie)) {
+            throw new UnAuthenticationException(GlobalErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        validateUserRefreshToken(refreshToken.getRefreshToken(), refreshTokenCookie.getValue());
 
         String accessToken = tokenProvider.createAccessToken(userId);
         updateNewRefreshToken(refreshToken);
+        CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, refreshToken.getRefreshToken());
 
-        return ReissueResponseDto.of(accessToken, refreshToken.getRefreshToken());
+        return ReissueResponseDto.of(accessToken);
     }
 
     public DuplicateMoldevIdResponseDto checkDuplicateMoldevId(String moldevId) {
@@ -114,6 +126,7 @@ public class AuthService {
         if (refreshTokenRepository.existsById(userId)) {
             RefreshToken originalRefreshToken = refreshTokenRepository.findById(userId).get();
             originalRefreshToken.update(newRefreshToken);
+            refreshTokenRepository.save(originalRefreshToken);
         } else {
             refreshTokenRepository.save(RefreshToken.of(userId, newRefreshToken));
         }
@@ -175,6 +188,7 @@ public class AuthService {
     private void updateNewRefreshToken(RefreshToken refreshToken) {
         String newRefreshToken = tokenProvider.createRefreshToken();
         refreshToken.update(newRefreshToken);
+        refreshTokenRepository.save(refreshToken);
     }
 
 }
