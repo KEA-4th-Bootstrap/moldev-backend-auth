@@ -1,16 +1,15 @@
 package org.bootstrap.auth.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bootstrap.auth.aws.S3Service;
 import org.bootstrap.auth.common.error.*;
 import org.bootstrap.auth.dto.request.LoginRequestDto;
+import org.bootstrap.auth.dto.request.ReissueRequestDto;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
-import org.bootstrap.auth.dto.response.BannedUserDetailResponseDto;
-import org.bootstrap.auth.dto.response.DuplicateMoldevIdResponseDto;
-import org.bootstrap.auth.dto.response.LoginResponseDto;
-import org.bootstrap.auth.dto.response.SignUpResponseDto;
+import org.bootstrap.auth.dto.response.*;
 import org.bootstrap.auth.entity.Member;
 import org.bootstrap.auth.jwt.Token;
 import org.bootstrap.auth.jwt.TokenProvider;
@@ -60,6 +59,18 @@ public class AuthService {
         saveRefreshToken(member.getId(), token.getRefreshToken());
         CookieUtils.addCookie(response, TokenProvider.REFRESH_TOKEN, token.getRefreshToken());
         return LoginResponseDto.of(member, token);
+    }
+
+    public ReissueResponseDto reissue(ReissueRequestDto request) throws JsonProcessingException {
+        Long userId = getUserIdFromAccessToken(request.accessToken());
+        RefreshToken refreshToken = getRefreshTokenFromUserId(userId);
+        validateRefreshTokenNotExpired(refreshToken);
+        validateUserRefreshToken(refreshToken.getRefreshToken(), request.refreshToken());
+
+        String accessToken = tokenProvider.createAccessToken(userId);
+        updateNewRefreshToken(refreshToken);
+
+        return ReissueResponseDto.of(accessToken, refreshToken.getRefreshToken());
     }
 
     public DuplicateMoldevIdResponseDto checkDuplicateMoldevId(String moldevId) {
@@ -140,6 +151,30 @@ public class AuthService {
     private String generateProfileImageFileName(String originalFileName, String moldevId) {
         String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
         return moldevId + extension;
+    }
+
+    private Long getUserIdFromAccessToken(String accessToken) throws JsonProcessingException {
+        return Long.parseLong(tokenProvider.decodeJwtPayloadSubject(accessToken));
+    }
+
+    private RefreshToken getRefreshTokenFromUserId(Long userId) {
+        return refreshTokenRepository.findById(userId)
+                .orElseThrow(() -> new UnAuthenticationException(GlobalErrorCode.EXPIRED_REFRESH_TOKEN));
+    }
+
+    private void validateRefreshTokenNotExpired(RefreshToken refreshToken) {
+        tokenProvider.validateRefreshToken(refreshToken.getRefreshToken());
+    }
+
+    private void validateUserRefreshToken(String originalRefreshToken, String requestRefreshToken) {
+        if(!originalRefreshToken.equals(requestRefreshToken)) {
+            throw new UnAuthenticationException(GlobalErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    private void updateNewRefreshToken(RefreshToken refreshToken) {
+        String newRefreshToken = tokenProvider.createRefreshToken();
+        refreshToken.update(newRefreshToken);
     }
 
 }
