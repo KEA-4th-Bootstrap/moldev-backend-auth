@@ -1,5 +1,7 @@
 package org.bootstrap.auth.jwt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +14,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -34,6 +39,7 @@ public class TokenProvider {
 
     public static final String ACCESS_TOKEN = "Access_Token";
     public static final String REFRESH_TOKEN = "Refresh_Token";
+    private final ObjectMapper objectMapper;
 
     // access token 발급 method
     public String createAccessToken(Long userId) {
@@ -100,6 +106,13 @@ public class TokenProvider {
         }
 
         return null;
+    }
+
+    public String decodeJwtPayloadSubject(String oldAccessToken) throws JsonProcessingException {
+        return objectMapper.readValue(
+                new String(Base64.getDecoder().decode(oldAccessToken.split("\\.")[1]), StandardCharsets.UTF_8),
+                Map.class
+        ).get("sub").toString();
     }
 }
 

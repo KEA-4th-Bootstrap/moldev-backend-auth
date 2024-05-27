@@ -1,13 +1,10 @@
 package org.bootstrap.auth.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.bootstrap.auth.common.SuccessResponse;
-import org.bootstrap.auth.dto.request.LoginRequestDto;
-import org.bootstrap.auth.dto.request.SendEmailRequestDto;
-import org.bootstrap.auth.dto.request.SignUpRequestDto;
-import org.bootstrap.auth.dto.request.VerifyEmailRequestDto;
+import org.bootstrap.auth.dto.request.*;
 import org.bootstrap.auth.dto.response.*;
 import org.bootstrap.auth.service.AuthService;
 import org.bootstrap.auth.service.EmailService;
@@ -55,6 +52,13 @@ public class AuthController {
         final LoginResponseDto loginResponseDto = authService.login(loginRequestDto, response);
         return ResponseEntity.status(HttpStatus.OK).body(loginResponseDto);
     }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<ReissueResponseDto> reissue(@RequestBody ReissueRequestDto reissueRequestDto) throws JsonProcessingException {
+        final ReissueResponseDto reissueResponseDto = authService.reissue(reissueRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(reissueResponseDto);
+    }
+
 
     @GetMapping("/check-duplicate/{moldevId}")
     public ResponseEntity<DuplicateMoldevIdResponseDto> checkId(@PathVariable("moldevId") String moldevId) {
