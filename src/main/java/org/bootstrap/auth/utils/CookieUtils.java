@@ -10,4 +10,16 @@ public class CookieUtils {
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
+
+    public static Cookie getCookie(Cookie[] cookies, String name) {
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(name)) {
+                return cookie;
+            }
+        }
+        return null;
+    }
 }
