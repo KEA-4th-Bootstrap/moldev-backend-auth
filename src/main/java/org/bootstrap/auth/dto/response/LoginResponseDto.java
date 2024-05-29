@@ -8,11 +8,13 @@ import org.bootstrap.auth.jwt.Token;
 @Builder(access = AccessLevel.PRIVATE)
 public record LoginResponseDto (
     String moldevId,
+    String nickname,
     String accessToken
 ) {
     public static LoginResponseDto of(Member member, Token token) {
         return LoginResponseDto.builder()
                 .moldevId(member.getMoldevId())
+                .nickname(member.getNickname())
                 .accessToken(token.getAccessToken())
                 .build();
     }
