@@ -72,6 +72,7 @@ public class AuthService {
 
         Cookie[] cookies = request.getCookies();
         Cookie refreshTokenCookie = getCookie(cookies, TokenProvider.REFRESH_TOKEN);
+        System.out.println(refreshTokenCookie + " cookie log");
         if (Objects.isNull(refreshTokenCookie)) {
             throw new UnAuthenticationException(GlobalErrorCode.INVALID_REFRESH_TOKEN);
         }
