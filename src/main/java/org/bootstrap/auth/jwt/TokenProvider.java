@@ -48,7 +48,7 @@ public class TokenProvider {
                 .setSubject(String.valueOf(userId))  // JWT 토큰 제목
                 .claim("adminYn", "ROLE_USER")   // 클레임 설정
                 .setIssuedAt(Timestamp.valueOf(LocalDateTime.now()))    // JWT 토큰 발급 시간
-                .setExpiration(Date.from(Instant.now().plus(accessExpirationHours, ChronoUnit.MINUTES)))    // JWT 토큰 만료 시간
+                .setExpiration(Date.from(Instant.now().plus(accessExpirationHours, ChronoUnit.HOURS)))    // JWT 토큰 만료 시간
                 .compact(); // JWT 토큰 생성
     }
 
