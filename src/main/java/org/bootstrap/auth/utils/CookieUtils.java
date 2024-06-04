@@ -11,6 +11,7 @@ public class CookieUtils {
                 .sameSite("None")
                 .httpOnly(false)
                 .secure(true)
+                .maxAge(60 * 60 * 240) //이거하나추가한거임 아무것도안함
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
