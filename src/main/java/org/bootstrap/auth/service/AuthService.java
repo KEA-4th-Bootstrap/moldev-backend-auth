@@ -158,7 +158,7 @@ public class AuthService {
     }
 
     private String getDefaultProfileImgUrl() {
-        return s3Service.getFileUrl(PROFILE_IMAGE_DIRECTORY + "/default.png");
+        return s3Service.getFileUrl(PROFILE_IMAGE_DIRECTORY + "/default_img.jpg");
     }
 
     private String generateProfileImageFileName(String originalFileName, String moldevId) {
