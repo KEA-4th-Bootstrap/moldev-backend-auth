@@ -5,6 +5,8 @@ import lombok.*;
 import org.bootstrap.auth.common.BaseTimeEntity;
 import org.bootstrap.auth.dto.request.SignUpRequestDto;
 
+import java.util.List;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PRIVATE)
@@ -39,8 +41,8 @@ public class Member extends BaseTimeEntity {
     @Builder.Default
     private Integer viewCount = 0;
 
-    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Ban ban;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Ban> ban;
 
     @Column(name = "marketing_agree", nullable = false)
     private Boolean isMarketingAgree;
